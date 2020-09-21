@@ -2,13 +2,14 @@ from math import sin, cos
 
 
 class Grammar:
-    chromosome = [0, 1, 0, 0, 1, 0, 1, 0, 0, 1]  # vale 2
+    chromosome = [3, 2, 1, 0, 0, 2, 2]  # vale 4
+    # [0, 1, 0, 0, 0, 0, 1, 0, 0, 9]  # vale 2
 
     theVariable = 3.0
 
     maxGeneValue = 2
     maxGeneExpression = 4
-    maxGeneUnary = 2
+    maxGeneUnary = 3
     maxGeneBinary = 3
 
     """
@@ -73,7 +74,7 @@ class Grammar:
         tmp = self.expr(i)
         expr1 = tmp[1]
         i = tmp[0] + 1
-        switch = self.chromosome[i] % self.maxGeneExpression
+        switch = self.chromosome[i] % self.maxGeneBinary
         tmp = self.expr(i)
         expr2 = tmp[1]
         i = tmp[0]
@@ -86,13 +87,15 @@ class Grammar:
             return i, expr1 * expr2
 
     def unary_op(self, i):
+        i = i + 1
+        switch = self.chromosome[i] % self.maxGeneUnary
         ret = self.expr(i)
-        i = ret[0] + 1
-        return {
-            0: (i, sin(ret.second)),
-            1: (i, cos(ret.second)),
-            2: (i, ret.second ** 2)
-        }.get(self.chromosome[i] % self.maxGeneUnary, (i, 0))
+        if switch == 0:
+            return ret[0], sin(ret[1])
+        elif switch == 1:
+            return ret[0], cos(ret[1])
+        elif switch == 2:
+            return ret[0], ret[1] ** 2
 
     def value(self, i):
         ret = self.number_generator(i)
