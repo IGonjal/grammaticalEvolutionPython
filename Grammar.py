@@ -6,6 +6,7 @@ class Grammar:
     # [0, 1, 0, 0, 0, 0, 1, 0, 0, 9]  # vale 2
 
     theVariable = 3.0
+    theVariableName = "X"
 
     maxGeneValue = 2
     maxGeneExpression = 4
@@ -56,7 +57,8 @@ class Grammar:
     # def __init__(self):
 
     def grammar(self):
-        return self.expr(-1)[1]
+        ret = self.expr(-1)
+        return ret[1], ret[2]
 
     def expr(self, i):
         i = i + 1
@@ -73,33 +75,35 @@ class Grammar:
     def binary_op(self, i):
         tmp = self.expr(i)
         expr1 = tmp[1]
+        str1 = tmp[2]
         i = tmp[0] + 1
         switch = self.chromosome[i] % self.maxGeneBinary
         tmp = self.expr(i)
         expr2 = tmp[1]
+        str2 = tmp[2]
         i = tmp[0]
 
         if switch == 0:
-            return i, expr1 + expr2
+            return i, expr1 + expr2, "( " + str1 + " + " + str2 + " )"
         elif switch == 1:
-            return i, expr1 - expr2
+            return i, expr1 - expr2, "( " + str1 + " - " + str2 + " )"
         elif switch == 2:
-            return i, expr1 * expr2
+            return i, expr1 * expr2, "( " + str1 + " * " + str2 + " )"
 
     def unary_op(self, i):
         i = i + 1
         switch = self.chromosome[i] % self.maxGeneUnary
         ret = self.expr(i)
         if switch == 0:
-            return ret[0], sin(ret[1])
+            return ret[0], sin(ret[1]), "sin(" + ret[2] + ")"
         elif switch == 1:
-            return ret[0], cos(ret[1])
+            return ret[0], cos(ret[1]), "cos(" + ret[2] + ")"
         elif switch == 2:
-            return ret[0], ret[1] ** 2
+            return ret[0], ret[1] ** 2, "(" + ret[2] + " ^ 2)"
 
     def value(self, i):
         ret = self.number_generator(i)
-        return ret[0], float(ret[1])
+        return ret[0], float(ret[1]), ret[1]
 
     def number_generator(self, i):
         i = i + 1
@@ -127,4 +131,4 @@ class Grammar:
         return i, str(self.chromosome[i] % 10)
 
     def variable(self, i):
-        return i + 1, self.theVariable
+        return i + 1, self.theVariable, self.theVariableName
