@@ -2,7 +2,7 @@ from math import sin, cos
 
 
 class Grammar:
-    valor = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    chromosome = [0, 1, 0, 0, 1, 0, 1, 0, 0, 1]  # vale 2
 
     theVariable = 3.0
 
@@ -10,7 +10,6 @@ class Grammar:
     maxGeneExpression = 4
     maxGeneUnary = 2
     maxGeneBinary = 3
-    valor2 = [0, 1, 1, 0, 1, 1]  # vale 2
 
     """
     s::= <expr>
@@ -19,7 +18,12 @@ class Grammar:
           (<expr> <op> <expr>       (0)
         | <val>                     (1)
         | <var>                     (2)
-        | <unop> <expr>             (3)
+        | <unary_op> <expr>         (3)
+    -----------------------------------
+    <unary_op> ::=
+          sin <exp>
+        | cos <exp>
+        | <exp> ^2
     -----------------------------------
     <op> ::=
           +                         (0)
@@ -35,112 +39,89 @@ class Grammar:
           <num> <int>               (1)
     -----------------------------------
     <num> ::= 
-          0
-        | 1
-        | 2
-        | 3
-        | 4
-        | 5
-        | 6
-        | 7
-        | 8
-        | 9
+          0                         (0)
+        | 1                         (1)
+        | 2                         (2)
+        | 3                         (3)
+        | 4                         (4)
+        | 5                         (5)
+        | 6                         (6)
+        | 7                         (7)
+        | 8                         (8)
+        | 9                         (9)
     <var> ::=
         x                           (0)
-    
     """
     # def __init__(self):
 
-    def grammar(self, var):
-        self.theVariable = var
-        return self.expr(0).second
+    def grammar(self):
+        return self.expr(-1)[1]
 
     def expr(self, i):
-        switch = i % self.maxGeneExpression
-        i = i+1
+        i = i + 1
+        switch = self.chromosome[i] % self.maxGeneExpression
         if switch == 0:
-            ret = self.binary_op(i)
-            return ret.first + 1, ret.second
+            return self.binary_op(i)
         elif switch == 1:
-            ret = self.value(i)
-            return ret.first + 1, ret.second
+            return self.value(i)
         elif switch == 2:
-            ret = self.variable(i)
-            return ret.first + 1, ret.second
+            return self.variable(i)
         elif switch == 3:
-            ret = self.unary_op(i)
-            return ret.first + 1, ret.second
-
-        else:
-            ret = self.value(i)
-            return ret.first + 1, ret.second
+            return self.unary_op(i)
 
     def binary_op(self, i):
-        expr1 = self.expr(i+1).first
-        i = expr1.first + 1
-        expr2 = self.expr(i + 1)
-        switch = i % self.maxGeneBinary
-        i = expr2.first + 1
-        expr2 = expr2.second
-        return {
-            0: (i, expr1 + expr2),
-            1: (i, expr1 - expr2),
-            2: (i, expr1 * expr2)
+        tmp = self.expr(i)
+        expr1 = tmp[1]
+        i = tmp[0] + 1
+        switch = self.chromosome[i] % self.maxGeneExpression
+        tmp = self.expr(i)
+        expr2 = tmp[1]
+        i = tmp[0]
 
-        }.get(self.value[switch], (i, 1.0))
+        if switch == 0:
+            return i, expr1 + expr2
+        elif switch == 1:
+            return i, expr1 - expr2
+        elif switch == 2:
+            return i, expr1 * expr2
 
     def unary_op(self, i):
-        ret = self.expr(self, i)
-        i = ret.first+1
+        ret = self.expr(i)
+        i = ret[0] + 1
         return {
             0: (i, sin(ret.second)),
             1: (i, cos(ret.second)),
-        }.get(self.value[ret.first] % self.maxGeneUnary, (i, 0))
+            2: (i, ret.second ** 2)
+        }.get(self.chromosome[i] % self.maxGeneUnary, (i, 0))
 
     def value(self, i):
-        ret = self.number_expr_generator(i)
-        return ret.first + 1, float(ret.second)
-        # if (i % self.maxGeneValue) == 0:
-        #     return i+1, 1.0
-        # return i+1, 0.1
+        ret = self.number_generator(i)
+        return ret[0], float(ret[1])
 
-    def number_expr_generator(self, i):
-        i = i+1
+    def number_generator(self, i):
+        i = i + 1
         tmp = self.integer_number_generator(i)
-        if i == 0:
-            return tmp.first + 1, tmp.second
-        i = tmp.first + 1
-        ret = tmp.second + "."
+        if self.chromosome[i] % 2 == 0:
+            return tmp[0], tmp[1]
+        i = tmp[0]
+        ret = tmp[1] + "."
         tmp = self.integer_number_generator(i)
-        ret = ret + tmp.second()
-        return tmp.first, ret
+        ret = ret + tmp[1]
+        return tmp[0], ret
 
-
-
-    def integer_number_generator(self,i):
+    def integer_number_generator(self, i):
         i = i + 1
         tmp = self.number_digit_generator(i)
-        i = tmp.first + 1
-        if self.valor[i] == 1:
-            ret = tmp.first, tmp.second
-        tmp = self.numberExprGenerator(tmp.first + 1)
-        ret = ret + tmp.second
-        return tmp.first, ret
+        if self.chromosome[i] % 2 == 0:
+            return tmp[0], tmp[1]
+        ret = tmp[1]
+        tmp = self.integer_number_generator(tmp[0])
+        ret = ret + tmp[1]
+        return tmp[0], ret
 
     def number_digit_generator(self, i):
         i = i + 1
-        return {
-            0: (i, "0"),
-            1: (i, "1"),
-            2: (i, "2"),
-            3: (i, "3"),
-            4: (i, "4"),
-            5: (i, "5"),
-            6: (i, "6"),
-            7: (i, "7"),
-            8: (i, "8"),
-            9: (i, "9")
-        }.get(self.value[i] % 10)
+        return i, str(self.chromosome[i] % 10)
 
     def variable(self, i):
-        return i+1, self.theVariable
+        return i + 1, self.theVariable
