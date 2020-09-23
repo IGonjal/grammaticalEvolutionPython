@@ -1,20 +1,20 @@
 from math import sin, cos
 import sys
+import Chromosome
 
 
 class Grammar:
-    chromosome = [0] # [3, 2, 1, 0, 0, 2, 2]  # vale 4
+
+    __wholeChromosome = None
+    _chromosome =[]  # [3, 2, 1, 0, 0, 2, 2]  # vale 4
     # [0, 1, 0, 0, 0, 0, 1, 0, 0, 9]  # vale 2
 
-    theVariable = 3.0
-    theVariableName = "X"
+    __theVariable = 3.0
+    __theVariableName = "X"
 
-    maxGeneValue = 2
-    maxGeneExpression = 4
-    maxGeneUnary = 3
-    maxGeneBinary = 3
-
-    maxGeneValue = 254
+    __maxGeneExpression = 4
+    __maxGeneUnary = 3
+    __maxGeneBinary = 3
 
     """
     s::= <expr>
@@ -57,38 +57,54 @@ class Grammar:
     <var> ::=
         x                           (0)
     """
-    # def __init__(self):
+
+    def __init__(self, chromosome=Chromosome(), the_var=3, var_name="X"):
+        self.__theVariable = the_var
+        self.__theVariableName = var_name
+        if isinstance(chromosome, Chromosome):
+            self.__wholeChromosome = chromosome
+            self.__chromosome = chromosome.get_array()
+        elif isinstance(chromosome, list) \
+                and all(isinstance(chromosome, int)) \
+                and len(chromosome) > 2:
+            self.__wholeChromosome = Chromosome(chromosome)
+            self.__chromosome = chromosome
+        else:
+            self.__wholeChromosome = Chromosome()
+            self._chromosome = self.__wholeChromosome.get_array()
 
     def grammar(self):
         try:
-            ret = self.expr(-1)
+            ret = self._expr(-1)
+            self.__wholeChromosome.set_result(ret[1])
+            self.__wholeChromosome.set_human_grammar(ret[2])
             return ret[1], ret[2]
         except ValueError as error:
             return sys.float_info.max, "**Error, chromosome too big**"
 
-    def expr(self, i):
+    def _expr(self, i):
         i = i + 1
-        if i >= len(self.chromosome):
+        if i >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        switch = self.chromosome[i] % self.maxGeneExpression
+        switch = self._chromosome[i] % self.__maxGeneExpression
         if switch == 0:
-            return self.binary_op(i)
+            return self._binary_op(i)
         elif switch == 1:
-            return self.value(i)
+            return self._value(i)
         elif switch == 2:
-            return self.variable(i)
+            return self._variable(i)
         elif switch == 3:
-            return self.unary_op(i)
+            return self._unary_op(i)
 
-    def binary_op(self, i):
-        if i + 1 >= len(self.chromosome):
+    def _binary_op(self, i):
+        if i + 1 >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        tmp = self.expr(i)
+        tmp = self._expr(i)
         expr1 = tmp[1]
         str1 = tmp[2]
         i = tmp[0] + 1
-        switch = self.chromosome[i] % self.maxGeneBinary
-        tmp = self.expr(i)
+        switch = self._chromosome[i] % self.__maxGeneBinary
+        tmp = self._expr(i)
         expr2 = tmp[1]
         str2 = tmp[2]
         i = tmp[0]
@@ -100,12 +116,12 @@ class Grammar:
         elif switch == 2:
             return i, expr1 * expr2, "( " + str1 + " * " + str2 + " )"
 
-    def unary_op(self, i):
+    def _unary_op(self, i):
         i = i + 1
-        if i >= len(self.chromosome):
+        if i >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        switch = self.chromosome[i] % self.maxGeneUnary
-        ret = self.expr(i)
+        switch = self._chromosome[i] % self.__maxGeneUnary
+        ret = self._expr(i)
         if switch == 0:
             return ret[0], sin(ret[1]), "sin(" + ret[2] + ")"
         elif switch == 1:
@@ -113,42 +129,42 @@ class Grammar:
         elif switch == 2:
             return ret[0], ret[1] ** 2, "(" + ret[2] + " ^ 2)"
 
-    def value(self, i):
-        ret = self.number_generator(i)
+    def _value(self, i):
+        ret = self._number_generator(i)
         return ret[0], float(ret[1]), ret[1]
 
-    def number_generator(self, i):
+    def _number_generator(self, i):
         i = i + 1
-        if i >= len(self.chromosome):
+        if i >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        tmp = self.integer_number_generator(i)
-        if self.chromosome[i] % 2 == 0:
+        tmp = self._integer_number_generator(i)
+        if self._chromosome[i] % 2 == 0:
             return tmp[0], tmp[1]
         i = tmp[0]
         ret = tmp[1] + "."
-        tmp = self.integer_number_generator(i)
+        tmp = self._integer_number_generator(i)
         ret = ret + tmp[1]
         return tmp[0], ret
 
-    def integer_number_generator(self, i):
+    def _integer_number_generator(self, i):
         i = i + 1
-        if i >= len(self.chromosome):
+        if i >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        tmp = self.number_digit_generator(i)
-        if self.chromosome[i] % 2 == 0:
+        tmp = self._number_digit_generator(i)
+        if self._chromosome[i] % 2 == 0:
             return tmp[0], tmp[1]
         ret = tmp[1]
-        tmp = self.integer_number_generator(tmp[0])
+        tmp = self._integer_number_generator(tmp[0])
         ret = ret + tmp[1]
         return tmp[0], ret
 
-    def number_digit_generator(self, i):
+    def _number_digit_generator(self, i):
         i = i + 1
-        if i >= len(self.chromosome):
+        if i >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        return i, str(self.chromosome[i] % 10)
+        return i, str(self._chromosome[i] % 10)
 
-    def variable(self, i):
-        if i + 1 >= len(self.chromosome):
+    def _variable(self, i):
+        if i + 1 >= len(self._chromosome):
             raise ValueError('the chromosome is too big')
-        return i + 1, self.theVariable, self.theVariableName
+        return i + 1, self.__theVariable, self.__theVariableName
