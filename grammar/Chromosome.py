@@ -9,7 +9,7 @@ class Chromosome:
     __chromosome = []
     result = 0.0
     fitness = sys.float_info.max
-    humanGrammar= ""
+    humanGrammar = ""
 
     def __init__(self, chromosome=[], var_name="X", size_for_new_chromosome=255):
         self.__theVariableName = var_name
@@ -20,7 +20,7 @@ class Chromosome:
             chromosome = [None] * size_for_new_chromosome
             for a in range(len(chromosome)):
                 chromosome[a] = random.randint(0, 254)
-            self._chromosome = chromosome
+            self.__chromosome = chromosome
 
     def get_array(self):
         return self.__chromosome

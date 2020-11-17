@@ -1,5 +1,6 @@
-import Chromosome
-import Grammar
+from grammar.Chromosome import Chromosome
+from grammar.Grammar import Grammar
+
 import random
 
 
