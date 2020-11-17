@@ -25,6 +25,9 @@ class Chromosome:
     def get_array(self):
         return self.__chromosome
 
+    def size(self, index):
+        return len(self.__chromosome)
+
     def mutate(self):
         if random.random() < self.mutationRatio:
             self.__chromosome[random.randint(0, len(self.__chromosome) - 1)] =  \
@@ -33,7 +36,7 @@ class Chromosome:
     def crossover(self, other, init_point=None):
         if isinstance(other, Chromosome):
             if init_point is None:
-                init_point = random(1, len(self.__chromosome) - 1)
+                init_point = random.randint(1, len(self.__chromosome) - 1)
             for i in range(init_point, len(self.__chromosome) - 1, 1):
                 aux = self.__chromosome[i]
                 self.__chromosome[i] = other.__chromosome[i]

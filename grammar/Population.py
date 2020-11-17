@@ -10,7 +10,7 @@ class Population:
 
     def __init__(self, size=512):
 
-        chr = [None] * size
+        self.chromosomes = [None] * size
         for i in range(size):
             self.chromosomes[i] = Chromosome()
 
