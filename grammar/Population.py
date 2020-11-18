@@ -19,13 +19,14 @@ class Population:
         # seleccion
             # Ruleta
             # Torneo
+        self.tournament()
 
         # cruce
         self.crossover()
         # mutación y descifrado
         self.mutation_and_decipher()
         # calcula fitness
-
+        self.fitness()
         # ordenación
         self.chromosomes.sort(key=lambda ch: ch.get_fitness())
 
@@ -46,3 +47,7 @@ class Population:
         random.shuffle(self.chromosomes)
         for i in range(0, len(self.chromosomes) - 1, 2):
             self.chromosomes[i]
+
+
+
+
